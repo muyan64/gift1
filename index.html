@@ -1,0 +1,2142 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>给你的特别礼物 🎁 + 便签 + 日历 + 弹幕 + 翻译 + 音乐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .gift-box {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            z-index: 20;
+        }
+        
+        .header {
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #e91e63;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            color: #9c27b0;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        
+        .message {
+            background: #f9f0ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border-left: 5px solid #e91e63;
+            text-align: left;
+            line-height: 1.8;
+            font-size: 1.1em;
+        }
+        
+        .interactive {
+            margin: 30px 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #e91e63, #9c27b0);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(233,30,99,0.3);
+        }
+        
+        .hidden-message {
+            display: none;
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            animation: fadeIn 1s;
+        }
+        
+        .decoration {
+            font-size: 2em;
+            margin: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            color: #777;
+            font-size: 0.9em;
+        }
+        
+        /* 功能区域容器 */
+        .features-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            max-width: 1800px;
+            width: 100%;
+            margin-top: 20px;
+            z-index: 20;
+        }
+        
+        .feature-box {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 便签区域样式 */
+        .note-title {
+            color: #4CAF50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .note-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex-grow: 1;
+        }
+        
+        .note-input {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 1em;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        .note-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .note-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .note-btn {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            padding: 10px 25px;
+            font-size: 0.9em;
+        }
+        
+        .note-btn.clear {
+            background: linear-gradient(45deg, #ff9800, #ff5722);
+        }
+        
+        .saved-notes {
+            margin-top: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        
+        .notes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .note-item {
+            background: #FFF9C4;
+            border-left: 5px solid #FFD600;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: left;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .note-date {
+            font-size: 0.8em;
+            color: #757575;
+            margin-bottom: 5px;
+        }
+        
+        .note-content {
+            word-wrap: break-word;
+            margin-bottom: 5px;
+        }
+        
+        .delete-note {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ff5252;
+            color: white;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 日历区域样式 */
+        .calendar-title {
+            color: #2196F3;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .calendar-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .calendar-nav {
+            background: #2196F3;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .calendar-month {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2196F3;
+        }
+        
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #757575;
+        }
+        
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            flex-grow: 1;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s;
+            position: relative;
+        }
+        
+        .calendar-day:hover {
+            background: #f0f0f0;
+        }
+        
+        .calendar-day.current {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .calendar-day.has-note::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            width: 5px;
+            height: 5px;
+            background: #4CAF50;
+            border-radius: 50%;
+        }
+        
+        .day-notes {
+            margin-top: 20px;
+            padding: 15px;
+            background: #E3F2FD;
+            border-radius: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .day-notes-title {
+            color: #2196F3;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .day-note-item {
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .day-note-delete {
+            background: #ff5252;
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.7em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 弹幕控制区域样式 */
+        .danmaku-title {
+            color: #FF4081;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .danmaku-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex-grow: 1;
+        }
+        
+        .danmaku-input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .danmaku-input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .danmaku-input:focus {
+            outline: none;
+            border-color: #FF4081;
+        }
+        
+        .danmaku-send {
+            background: linear-gradient(45deg, #FF4081, #F50057);
+            padding: 12px 25px;
+            font-size: 0.9em;
+        }
+        
+        .danmaku-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .danmaku-btn {
+            background: linear-gradient(45deg, #FF4081, #F50057);
+            padding: 8px 20px;
+            font-size: 0.9em;
+        }
+        
+        .danmaku-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .setting-label {
+            font-size: 0.9em;
+        }
+        
+        .setting-value {
+            font-weight: bold;
+            color: #FF4081;
+        }
+        
+        input[type="range"] {
+            width: 70%;
+        }
+        
+        /* 弹幕显示区域 - 置于最上层 */
+        .danmaku-display {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+        
+        .danmaku-item {
+            position: absolute;
+            white-space: nowrap;
+            pointer-events: none;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            animation: danmakuMove linear forwards;
+        }
+        
+        /* 翻译器区域样式 */
+        .translator-title {
+            color: #FF9800;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .translator-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex-grow: 1;
+        }
+        
+        .translator-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .translator-input {
+            width: 100%;
+            height: 80px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 1em;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        .translator-input:focus {
+            outline: none;
+            border-color: #FF9800;
+        }
+        
+        .translator-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .translator-btn {
+            background: linear-gradient(45deg, #FF9800, #FF5722);
+            padding: 10px 25px;
+            font-size: 0.9em;
+        }
+        
+        .translator-result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #FFF3E0;
+            border-radius: 15px;
+            min-height: 80px;
+        }
+        
+        .result-title {
+            color: #FF9800;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        
+        #translationResult {
+            word-wrap: break-word;
+            line-height: 1.6;
+        }
+        
+        /* 音乐播放器样式 */
+        .music-player-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 350px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            z-index: 10000;
+            overflow: hidden;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .music-player-container.minimized {
+            width: 60px;
+            height: 60px;
+            bottom: 30px;
+            right: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce 2s infinite;
+        }
+        
+        .music-player-header {
+            background: linear-gradient(45deg, #9C27B0, #673AB7);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .music-player-title {
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .player-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .player-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        
+        .player-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .music-player-body {
+            padding: 20px;
+        }
+        
+        .song-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .album-art {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .song-details {
+            flex-grow: 1;
+        }
+        
+        .song-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .song-artist {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .player-progress {
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(45deg, #9C27B0, #673AB7);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: #666;
+        }
+        
+        .player-main-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-btn {
+            background: #f0f0f0;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: #e0e0e0;
+            transform: scale(1.1);
+        }
+        
+        .play-btn {
+            background: linear-gradient(45deg, #9C27B0, #673AB7);
+            color: white;
+            width: 50px;
+            height: 50px;
+        }
+        
+        .play-btn:hover {
+            background: linear-gradient(45deg, #8E24AA, #5E35B1);
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .volume-icon {
+            color: #666;
+        }
+        
+        .volume-slider {
+            flex-grow: 1;
+        }
+        
+        .playlist {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .playlist-title {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .playlist-item {
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .playlist-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .playlist-item.active {
+            background: #F3E5F5;
+            border-left: 4px solid #9C27B0;
+        }
+        
+        .playlist-item-playing {
+            color: #9C27B0;
+            font-size: 0.8em;
+        }
+        
+        /* 最小化后的跳动emoji */
+        .mini-player {
+            font-size: 2em;
+            cursor: pointer;
+            animation: bounce 2s infinite;
+        }
+        
+        /* 动画定义 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes danmakuMove {
+            from {
+                transform: translateX(100vw);
+            }
+            to {
+                transform: translateX(-100%);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .features-container {
+                flex-direction: column;
+                max-width: 900px;
+            }
+            
+            .music-player-container {
+                width: 320px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 2em; }
+            .gift-box, .feature-box { padding: 20px; }
+            .message { font-size: 1em; }
+            .note-title, .calendar-title, .danmaku-title, .translator-title { font-size: 1.5em; }
+            .calendar-days { gap: 3px; }
+            .danmaku-input-container { flex-direction: column; }
+            .music-player-container {
+                width: calc(100% - 40px);
+                right: 20px;
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gift-box">
+        <div class="header">
+            <h1>🎁 一緒に遠くへ行こう！ 🎁</h1>
+            <div class="subtitle">生きているうちにはいいことがあるよ</div>
+        </div>
+        
+        <div class="decoration">✨ 💖 ✨</div>
+        
+        <div class="message">
+            <p>能看到这个网页的你：</p>
+            <p>这个网页是我第一次做的可能还有许多不足，希望你能多多包容。</p>
+            <p>愿你的每一天都充满阳光，愿你的每个梦想都能绽放，愿快乐常伴你左右！</p>
+            <p style="text-align: right; margin-top: 15px;">—— 每一个看到网页的人  💝</p>
+        </div>
+        
+        <div class="interactive">
+            <button onclick="showMessage()">点击接收祝福</button>
+            <button onclick="changeBackground()">换个心情</button>
+            
+            <div id="secretMessage" class="hidden-message">
+                <h3>🎉 エッグ！</h3>
+                <p>おめでとう！隠しエッグを発見したね！！</p>
+                <p>おめでとう：<br>
+                私は進む足を止めない、これからもっと高い境地を追い求める！<br>
+                アメイジング！今日も思いっきり歌おう……！私はあなたの日々樹渉です…… <br>
+                サプライズとはつまり刺激で、刺激があるからこそ万物は進化するのです！</p>
+                <div style="font-size: 2em; margin-top: 10px;">🪽 ✨ 🌟</div>
+            </div>
+        </div>
+        
+        <div class="decoration">🎈 🎂 🎈</div>
+        
+        <div class="footer">
+            <p>这份礼物由HTML/CSS/JS制成 | 刷新页面会有不同效果哦</p>
+            <p>© <span id="currentYear"></span> 特别为你制作</p>
+        </div>
+    </div>
+
+    <!-- 功能区域 -->
+    <div class="features-container">
+        <!-- 便签区域 -->
+        <div class="feature-box">
+            <div class="note-title">
+                <span>📝 你的专属便签</span>
+            </div>
+            
+            <div class="note-container">
+                <textarea id="noteInput" class="note-input" placeholder="在这里写下你的想法、待办事项、灵感或任何想记录的内容..."></textarea>
+                
+                <div class="note-buttons">
+                    <button class="note-btn" onclick="saveNote()">保存便签</button>
+                    <button class="note-btn clear" onclick="clearAllNotes()">清空所有便签</button>
+                    <button class="note-btn" onclick="addSampleNote()">添加示例便签</button>
+                </div>
+                
+                <div class="saved-notes">
+                    <h3 style="color: #4CAF50; margin-bottom: 10px; font-size: 1.2em;">📋 已保存的便签</h3>
+                    <div id="notesList" class="notes-list">
+                        <!-- 便签会动态加载到这里 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 日历区域 -->
+        <div class="feature-box">
+            <div class="calendar-title">
+                <span>📅 日历与日程</span>
+            </div>
+            
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button class="calendar-nav" onclick="changeMonth(-1)">‹</button>
+                    <div class="calendar-month" id="currentMonth">2023年12月</div>
+                    <button class="calendar-nav" onclick="changeMonth(1)">›</button>
+                </div>
+                
+                <div class="calendar-weekdays">
+                    <div>日</div>
+                    <div>一</div>
+                    <div>二</div>
+                    <div>三</div>
+                    <div>四</div>
+                    <div>五</div>
+                    <div>六</div>
+                </div>
+                
+                <div class="calendar-days" id="calendarDays">
+                    <!-- 日历天数会动态生成 -->
+                </div>
+                
+                <div class="day-notes" id="dayNotesContainer">
+                    <div class="day-notes-title" id="selectedDayTitle">未选择日期</div>
+                    <div id="dayNotesList">
+                        <!-- 选中日期的便签会显示在这里 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 弹幕控制区域 -->
+        <div class="feature-box">
+            <div class="danmaku-title">
+                <span>🎯 动态弹幕</span>
+            </div>
+            
+            <div class="danmaku-container">
+                <div class="danmaku-input-container">
+                    <input type="text" id="danmakuInput" class="danmaku-input" placeholder="输入弹幕内容，然后发送...">
+                    <button class="danmaku-send" onclick="sendDanmaku()">发送弹幕</button>
+                </div>
+                
+                <div class="danmaku-controls">
+                    <button class="danmaku-btn" onclick="toggleDanmaku()">暂停/继续弹幕</button>
+                    <button class="danmaku-btn" onclick="clearDanmaku()">清除所有弹幕</button>
+                    <button class="danmaku-btn" onclick="addSampleDanmaku()">添加示例弹幕</button>
+                </div>
+                
+                <div class="danmaku-settings">
+                    <div class="setting-row">
+                        <span class="setting-label">弹幕速度：</span>
+                        <span class="setting-value" id="speedValue">5</span>
+                    </div>
+                    <input type="range" id="speedSlider" min="1" max="10" value="5" oninput="updateDanmakuSpeed(this.value)">
+                    
+                    <div class="setting-row">
+                        <span class="setting-label">弹幕密度：</span>
+                        <span class="setting-value" id="densityValue">3</span>
+                    </div>
+                    <input type="range" id="densitySlider" min="1" max="5" value="3" oninput="updateDanmakuDensity(this.value)">
+                    
+                    <div class="setting-row">
+                        <span class="setting-label">字体大小：</span>
+                        <span class="setting-value" id="fontSizeValue">20</span>
+                    </div>
+                    <input type="range" id="fontSizeSlider" min="16" max="30" value="20" oninput="updateDanmakuFontSize(this.value)">
+                    
+                    <div class="setting-row">
+                        <span class="setting-label">透明度：</span>
+                        <span class="setting-value" id="opacityValue">0.8</span>
+                    </div>
+                    <input type="range" id="opacitySlider" min="0.1" max="1" step="0.1" value="0.8" oninput="updateDanmakuOpacity(this.value)">
+                </div>
+            </div>
+        </div>
+        
+        <!-- 翻译器区域 -->
+        <div class="feature-box">
+            <div class="translator-title">
+                <span>🔤 中文→日文翻译器</span>
+            </div>
+            
+            <div class="translator-container">
+                <div class="translator-input-container">
+                    <textarea id="translatorInput" class="translator-input" placeholder="请输入要翻译的中文..."></textarea>
+                </div>
+                
+                <div class="translator-buttons">
+                    <button class="translator-btn" onclick="translateText()">翻译成日文</button>
+                    <button class="translator-btn" onclick="clearTranslation()">清空</button>
+                    <button class="translator-btn" onclick="addSampleText()">示例文本</button>
+                </div>
+                
+                <div class="translator-result">
+                    <div class="result-title">翻译结果：</div>
+                    <div id="translationResult">翻译结果将显示在这里...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹幕显示区域 -->
+    <div class="danmaku-display" id="danmakuDisplay"></div>
+
+    <!-- 音乐播放器 -->
+    <div class="music-player-container" id="musicPlayer">
+        <div class="music-player-header">
+            <div class="music-player-title">
+                <span>🎵 音乐播放器</span>
+            </div>
+            <div class="player-controls">
+                <button class="player-btn" onclick="toggleMinimize()" title="最小化">－</button>
+            </div>
+        </div>
+        
+        <div class="music-player-body" id="playerBody">
+            <div class="song-info">
+                <img id="albumArt" class="album-art" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" alt="专辑封面">
+                <div class="song-details">
+                    <div id="songTitle" class="song-title">Kawaii Music</div>
+                    <div id="songArtist" class="song-artist">可愛いアーティスト</div>
+                </div>
+            </div>
+            
+            <div class="player-progress">
+                <div class="progress-bar">
+                    <div id="progress" class="progress"></div>
+                </div>
+                <div class="time-info">
+                    <span id="currentTime">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+            
+            <div class="player-main-controls">
+                <button class="control-btn" onclick="previousSong()" title="上一首">⏮</button>
+                <button id="playBtn" class="control-btn play-btn" onclick="togglePlay()" title="播放">▶</button>
+                <button class="control-btn" onclick="nextSong()" title="下一首">⏭</button>
+            </div>
+            
+            <div class="volume-control">
+                <span class="volume-icon">🔊</span>
+                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.1" value="0.7" oninput="changeVolume(this.value)">
+            </div>
+            
+            <div class="playlist">
+                <div class="playlist-title">
+                    <span>📜 播放列表</span>
+                </div>
+                <div id="playlistItems">
+                    <!-- 播放列表会动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 最小化后的emoji -->
+        <div class="mini-player" id="miniPlayer" style="display: none;" onclick="toggleMinimize()">🎵</div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        let selectedDay = null;
+        let danmakuActive = true;
+        let danmakuSpeed = 5;
+        let danmakuDensity = 3;
+        let danmakuFontSize = 20;
+        let danmakuOpacity = 0.8;
+        let danmakuInterval = null;
+        
+        // 音乐播放器变量
+        let audioPlayer = null;
+        let isPlaying = false;
+        let currentSongIndex = 0;
+        let isMinimized = false;
+        let progressInterval = null;
+        
+        // 音乐库
+        const musicLibrary = [
+            {
+                title: "Kawaii Melody",
+                artist: "可愛いアーティスト",
+                src: "https://assets.mixkit.co/music/preview/mixkit-clear-sky-479.mp3",
+                cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
+            },
+            {
+                title: "Happy Day",
+                artist: "快乐作曲家",
+                src: "https://assets.mixkit.co/music/preview/mixkit-sunny-day-518.mp3",
+                cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
+            },
+            {
+                title: "Chill Vibes",
+                artist: "放松音乐家",
+                src: "https://assets.mixkit.co/music/preview/mixkit-chill-vibes-239.mp3",
+                cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
+            },
+            {
+                title: "Dreamy Piano",
+                artist: "钢琴诗人",
+                src: "https://assets.mixkit.co/music/preview/mixkit-dreamy-piano-667.mp3",
+                cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
+            },
+            {
+                title: "Upbeat Fun",
+                artist: "活力乐队",
+                src: "https://assets.mixkit.co/music/preview/mixkit-upbeat-fun-581.mp3",
+                cover: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
+            }
+        ];
+        
+        // 页面加载时初始化
+        window.onload = function() {
+            // 初始化礼物盒动画
+            document.querySelector('.gift-box').style.opacity = '0';
+            document.querySelector('.gift-box').style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                document.querySelector('.gift-box').style.transition = 'opacity 1s, transform 1s';
+                document.querySelector('.gift-box').style.opacity = '1';
+                document.querySelector('.gift-box').style.transform = 'translateY(0)';
+            }, 300);
+            
+            // 添加随机装饰
+            const decorations = ['🌸', '🎀', '🎨', '🎯', '🧸', '🎪', '🎮', '🎵'];
+            const decorElements = document.querySelectorAll('.decoration');
+            decorElements.forEach(el => {
+                el.innerHTML = decorations[Math.floor(Math.random() * decorations.length)] + 
+                              ' 💖 ' + 
+                              decorations[Math.floor(Math.random() * decorations.length)];
+            });
+            
+            // 设置当前年份
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            
+            // 初始化功能
+            loadNotes();
+            generateCalendar();
+            startDanmaku();
+            initMusicPlayer();
+            
+            // 添加一些初始弹幕
+            setTimeout(() => {
+                const initialDanmaku = [
+                    "🎉 祝你天天开心！",
+                    "✨ 这个网页好有趣！",
+                    "💖 愿你梦想成真！",
+                    "🎁 这是一份特别的礼物",
+                    "🌟 充满惊喜的网页"
+                ];
+                
+                initialDanmaku.forEach((text, index) => {
+                    setTimeout(() => {
+                        createDanmaku(text);
+                    }, index * 1000);
+                });
+            }, 2000);
+        };
+        
+        // ==================== 礼物页面功能 ====================
+        
+        // 显示隐藏信息
+        function showMessage() {
+            const message = document.getElementById('secretMessage');
+            message.style.display = 'block';
+            
+            // 添加一些特效
+            document.querySelector('.gift-box').style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                document.querySelector('.gift-box').style.transform = 'scale(1)';
+            }, 300);
+        }
+        
+        // 更改背景颜色
+        function changeBackground() {
+            const colors = [
+                'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
+                'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)',
+                'linear-gradient(135deg, #fdcbf1 0%, #e6dee9 100%)',
+                'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)'
+            ];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            document.body.style.background = randomColor;
+            
+            // 弹幕颜色会根据背景自动调整
+            updateAllDanmakuColors();
+        }
+        
+        // ==================== 便签功能 ====================
+        
+        // 保存便签到localStorage
+        function saveNote() {
+            const noteInput = document.getElementById('noteInput');
+            const noteText = noteInput.value.trim();
+            
+            if (noteText === '') {
+                showNotification('请输入便签内容！', 'warning');
+                return;
+            }
+            
+            // 获取现有便签
+            let notes = JSON.parse(localStorage.getItem('giftNotes')) || [];
+            
+            // 创建新便签对象
+            const newNote = {
+                id: Date.now(),
+                text: noteText,
+                date: new Date().toLocaleString('zh-CN'),
+                color: getRandomNoteColor()
+            };
+            
+            // 添加到便签列表
+            notes.push(newNote);
+            
+            // 保存到localStorage
+            localStorage.setItem('giftNotes', JSON.stringify(notes));
+            
+            // 清空输入框
+            noteInput.value = '';
+            
+            // 重新加载便签列表
+            loadNotes();
+            
+            // 更新日历显示（如果当前选中了日期）
+            if (selectedDay) {
+                showDayNotes(selectedDay);
+            }
+            
+            // 显示成功消息
+            showNotification('便签已保存！', 'success');
+        }
+        
+        // 加载便签
+        function loadNotes() {
+            const notesList = document.getElementById('notesList');
+            const notes = JSON.parse(localStorage.getItem('giftNotes')) || [];
+            
+            // 清空现有列表
+            notesList.innerHTML = '';
+            
+            if (notes.length === 0) {
+                notesList.innerHTML = '<div style="color: #999; text-align: center; padding: 10px;">还没有便签，快来写第一条吧！</div>';
+                return;
+            }
+            
+            // 按时间倒序排列（最新的在前面）
+            notes.sort((a, b) => b.id - a.id);
+            
+            // 添加每个便签到列表
+            notes.forEach(note => {
+                const noteElement = document.createElement('div');
+                noteElement.className = 'note-item';
+                noteElement.style.borderLeftColor = note.color;
+                
+                noteElement.innerHTML = `
+                    <button class="delete-note" onclick="deleteNote(${note.id})">×</button>
+                    <div class="note-date">${note.date}</div>
+                    <div class="note-content">${escapeHtml(note.text).replace(/\n/g, '<br>')}</div>
+                `;
+                
+                notesList.appendChild(noteElement);
+            });
+        }
+        
+        // 删除便签
+        function deleteNote(noteId) {
+            let notes = JSON.parse(localStorage.getItem('giftNotes')) || [];
+            
+            // 过滤掉要删除的便签
+            notes = notes.filter(note => note.id !== noteId);
+            
+            // 保存更新后的便签列表
+            localStorage.setItem('giftNotes', JSON.stringify(notes));
+            
+            // 重新加载便签列表
+            loadNotes();
+            
+            // 更新日历显示（如果当前选中了日期）
+            if (selectedDay) {
+                showDayNotes(selectedDay);
+            }
+            
+            // 显示通知
+            showNotification('便签已删除', 'info');
+        }
+        
+        // 清空所有便签
+        function clearAllNotes() {
+            if (confirm('确定要清空所有便签吗？这个操作无法撤销！')) {
+                localStorage.removeItem('giftNotes');
+                loadNotes();
+                
+                // 更新日历显示
+                if (selectedDay) {
+                    showDayNotes(selectedDay);
+                }
+                
+                showNotification('所有便签已清空', 'info');
+            }
+        }
+        
+        // 添加示例便签
+        function addSampleNote() {
+            const sampleNotes = [
+                "今天要完成的重要事项...",
+                "突然想到的灵感：下次可以尝试...",
+                "值得感恩的三件事：1. 2. 3.",
+                "购物清单：\n- 牛奶\n- 鸡蛋\n- 水果",
+                "本周目标：\n1. 阅读一本书\n2. 锻炼三次\n3. 学习新技能",
+                "给朋友的生日祝福：祝你生日快乐，天天开心！"
+            ];
+            
+            const randomNote = sampleNotes[Math.floor(Math.random() * sampleNotes.length)];
+            document.getElementById('noteInput').value = randomNote;
+            showNotification('示例便签已添加，可以修改后保存', 'info');
+        }
+        
+        // 获取随机便签颜色
+        function getRandomNoteColor() {
+            const colors = ['#FFD600', '#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#009688'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        // ==================== 日历功能 ====================
+        
+        // 生成日历
+        function generateCalendar() {
+            const calendarDays = document.getElementById('calendarDays');
+            const currentMonthElement = document.getElementById('currentMonth');
+            
+            // 清空日历
+            calendarDays.innerHTML = '';
+            
+            // 设置当前月份显示
+            const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+            currentMonthElement.textContent = `${currentYear}年${monthNames[currentMonth]}`;
+            
+            // 获取当前月份的第一天和最后一天
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const firstDayIndex = firstDay.getDay();
+            
+            // 添加上个月的最后几天
+            const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
+            for (let i = firstDayIndex; i > 0; i--) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = prevMonthLastDay - i + 1;
+                dayElement.style.color = '#ccc';
+                calendarDays.appendChild(dayElement);
+            }
+            
+            // 添加当前月的所有天数
+            const today = new Date();
+            const notes = JSON.parse(localStorage.getItem('giftNotes')) || [];
+            
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = i;
+                
+                // 检查是否是今天
+                if (currentYear === today.getFullYear() && 
+                    currentMonth === today.getMonth() && 
+                    i === today.getDate()) {
+                    dayElement.classList.add('current');
+                }
+                
+                // 检查这一天是否有便签
+                const dateStr = `${currentYear}-${currentMonth + 1}-${i}`;
+                const hasNote = notes.some(note => {
+                    const noteDate = new Date(note.id);
+                    return noteDate.getFullYear() === currentYear && 
+                           noteDate.getMonth() === currentMonth && 
+                           noteDate.getDate() === i;
+                });
+                
+                if (hasNote) {
+                    dayElement.classList.add('has-note');
+                }
+                
+                // 添加点击事件
+                dayElement.onclick = () => selectDay(i);
+                
+                calendarDays.appendChild(dayElement);
+            }
+            
+            // 添加下个月的前几天以填满网格
+            const totalCells = 42; // 6行 x 7列
+            const nextDays = totalCells - (firstDayIndex + daysInMonth);
+            for (let i = 1; i <= nextDays; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = i;
+                dayElement.style.color = '#ccc';
+                calendarDays.appendChild(dayElement);
+            }
+            
+            // 如果没有选中日期，选中今天（如果在本月）
+            if (!selectedDay && currentYear === today.getFullYear() && currentMonth === today.getMonth()) {
+                selectDay(today.getDate());
+            }
+        }
+        
+        // 改变月份
+        function changeMonth(direction) {
+            currentMonth += direction;
+            
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            
+            selectedDay = null;
+            generateCalendar();
+        }
+        
+        // 选择日期
+        function selectDay(day) {
+            selectedDay = day;
+            showDayNotes(day);
+            
+            // 更新选中状态
+            const dayElements = document.querySelectorAll('.calendar-day');
+            dayElements.forEach(el => el.classList.remove('current-selected'));
+            
+            // 找到选中的日期元素
+            const selectedElement = Array.from(dayElements).find(el => {
+                return el.textContent == day && !el.style.color; // 排除灰色日期
+            });
+            
+            if (selectedElement) {
+                selectedElement.style.background = '#4CAF50';
+                selectedElement.style.color = 'white';
+            }
+        }
+        
+        // 显示选中日期的便签
+        function showDayNotes(day) {
+            const dayNotesList = document.getElementById('dayNotesList');
+            const selectedDayTitle = document.getElementById('selectedDayTitle');
+            
+            // 设置标题
+            selectedDayTitle.textContent = `${currentYear}年${currentMonth + 1}月${day}日的便签`;
+            
+            // 获取所有便签
+            const notes = JSON.parse(localStorage.getItem('giftNotes')) || [];
+            
+            // 过滤出选中日期的便签
+            const dayNotes = notes.filter(note => {
+                const noteDate = new Date(note.id);
+                return noteDate.getFullYear() === currentYear && 
+                       noteDate.getMonth() === currentMonth && 
+                       noteDate.getDate() === day;
+            });
+            
+            // 清空列表
+            dayNotesList.innerHTML = '';
+            
+            if (dayNotes.length === 0) {
+                dayNotesList.innerHTML = '<div style="color: #999; text-align: center; padding: 10px;">这一天没有便签</div>';
+                return;
+            }
+            
+            // 添加便签到列表
+            dayNotes.forEach(note => {
+                const noteElement = document.createElement('div');
+                noteElement.className = 'day-note-item';
+                
+                noteElement.innerHTML = `
+                    <div>${escapeHtml(note.text).substring(0, 30)}${note.text.length > 30 ? '...' : ''}</div>
+                    <button class="day-note-delete" onclick="deleteNote(${note.id}); showDayNotes(${day});">×</button>
+                `;
+                
+                dayNotesList.appendChild(noteElement);
+            });
+        }
+        
+        // ==================== 弹幕功能 ====================
+        
+        // 开始弹幕
+        function startDanmaku() {
+            // 清除之前的定时器
+            if (danmakuInterval) clearInterval(danmakuInterval);
+            
+            // 根据密度设置定时器
+            const intervalTime = 1000 / danmakuDensity;
+            danmakuInterval = setInterval(() => {
+                if (danmakuActive) {
+                    // 随机显示一条弹幕
+                    const danmakuList = JSON.parse(localStorage.getItem('giftDanmaku')) || [];
+                    if (danmakuList.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * danmakuList.length);
+                        createDanmaku(danmakuList[randomIndex].text);
+                    }
+                }
+            }, intervalTime);
+        }
+        
+        // 创建弹幕
+        function createDanmaku(text) {
+            if (!text || text.trim() === '') return;
+            
+            const danmakuDisplay = document.getElementById('danmakuDisplay');
+            const danmakuItem = document.createElement('div');
+            danmakuItem.className = 'danmaku-item';
+            danmakuItem.textContent = text;
+            
+            // 设置随机样式
+            const top = Math.random() * 90; // 0-90% 的随机位置
+            const color = getRandomColor();
+            const speed = 10 + (10 - danmakuSpeed) * 5; // 速度值越大，实际速度越慢
+            
+            // 使用rgba颜色设置透明度
+            const rgbaColor = hexToRgba(color, danmakuOpacity);
+            
+            danmakuItem.style.top = `${top}%`;
+            danmakuItem.style.color = rgbaColor;
+            danmakuItem.style.fontSize = `${danmakuFontSize}px`;
+            danmakuItem.style.animationDuration = `${speed}s`;
+            
+            // 根据背景亮度调整文字阴影，确保可读性
+            adjustDanmakuShadow(danmakuItem, color);
+            
+            // 添加到显示区域
+            danmakuDisplay.appendChild(danmakuItem);
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                if (danmakuItem.parentNode) {
+                    danmakuItem.parentNode.removeChild(danmakuItem);
+                }
+            }, speed * 1000);
+        }
+        
+        // 发送弹幕
+        function sendDanmaku() {
+            const danmakuInput = document.getElementById('danmakuInput');
+            const text = danmakuInput.value.trim();
+            
+            if (text === '') {
+                showNotification('请输入弹幕内容！', 'warning');
+                return;
+            }
+            
+            // 获取现有弹幕
+            let danmakuList = JSON.parse(localStorage.getItem('giftDanmaku')) || [];
+            
+            // 创建新弹幕对象
+            const newDanmaku = {
+                id: Date.now(),
+                text: text,
+                date: new Date().toLocaleString('zh-CN')
+            };
+            
+            // 添加到弹幕列表
+            danmakuList.push(newDanmaku);
+            
+            // 保存到localStorage
+            localStorage.setItem('giftDanmaku', JSON.stringify(danmakuList));
+            
+            // 立即显示弹幕
+            createDanmaku(text);
+            
+            // 清空输入框
+            danmakuInput.value = '';
+            
+            // 显示成功消息
+            showNotification('弹幕已发送！', 'success');
+        }
+        
+        // 切换弹幕状态
+        function toggleDanmaku() {
+            danmakuActive = !danmakuActive;
+            showNotification(danmakuActive ? '弹幕已继续' : '弹幕已暂停', 'info');
+        }
+        
+        // 清除所有弹幕
+        function clearDanmaku() {
+            if (confirm('确定要清除所有弹幕吗？这个操作无法撤销！')) {
+                localStorage.removeItem('giftDanmaku');
+                document.getElementById('danmakuDisplay').innerHTML = '';
+                showNotification('所有弹幕已清除', 'info');
+            }
+        }
+        
+        // 添加示例弹幕
+        function addSampleDanmaku() {
+            const sampleDanmaku = [
+                "🎉 祝你天天开心！",
+                "✨ 这个网页好有趣！",
+                "💖 愿你梦想成真！",
+                "🎁 这是一份特别的礼物",
+                "🌟 充满惊喜的网页",
+                "😊 祝你每天都有好心情",
+                "🌈 生活就像彩虹一样多彩",
+                "🎈 让快乐像气球一样飞起来",
+                "🍀 好运常伴你左右",
+                "⭐ 你是最闪亮的星"
+            ];
+            
+            const randomDanmaku = sampleDanmaku[Math.floor(Math.random() * sampleDanmaku.length)];
+            document.getElementById('danmakuInput').value = randomDanmaku;
+            showNotification('示例弹幕已添加，可以修改后发送', 'info');
+        }
+        
+        // 更新弹幕速度
+        function updateDanmakuSpeed(value) {
+            danmakuSpeed = parseInt(value);
+            document.getElementById('speedValue').textContent = value;
+            
+            // 重新开始弹幕以应用新速度
+            startDanmaku();
+        }
+        
+        // 更新弹幕密度
+        function updateDanmakuDensity(value) {
+            danmakuDensity = parseInt(value);
+            document.getElementById('densityValue').textContent = value;
+            
+            // 重新开始弹幕以应用新密度
+            startDanmaku();
+        }
+        
+        // 更新弹幕字体大小
+        function updateDanmakuFontSize(value) {
+            danmakuFontSize = parseInt(value);
+            document.getElementById('fontSizeValue').textContent = value;
+        }
+        
+        // 更新弹幕透明度
+        function updateDanmakuOpacity(value) {
+            danmakuOpacity = parseFloat(value);
+            document.getElementById('opacityValue').textContent = value;
+            
+            // 更新所有现有弹幕的透明度
+            updateAllDanmakuOpacity();
+        }
+        
+        // 根据背景调整所有弹幕颜色
+        function updateAllDanmakuColors() {
+            const danmakuItems = document.querySelectorAll('.danmaku-item');
+            danmakuItems.forEach(item => {
+                const color = item.style.color;
+                adjustDanmakuShadow(item, color);
+            });
+        }
+        
+        // 更新所有弹幕的透明度
+        function updateAllDanmakuOpacity() {
+            const danmakuItems = document.querySelectorAll('.danmaku-item');
+            danmakuItems.forEach(item => {
+                // 获取当前颜色并转换为rgba格式
+                const currentColor = item.style.color;
+                // 提取rgb值并添加新的透明度
+                const rgbMatch = currentColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (rgbMatch) {
+                    const r = rgbMatch[1];
+                    const g = rgbMatch[2];
+                    const b = rgbMatch[3];
+                    item.style.color = `rgba(${r}, ${g}, ${b}, ${danmakuOpacity})`;
+                }
+            });
+        }
+        
+        // 根据背景亮度调整弹幕阴影
+        function adjustDanmakuShadow(element, color) {
+            // 计算颜色的亮度
+            let r, g, b;
+            
+            // 处理hex颜色
+            if (color.startsWith('#')) {
+                r = parseInt(color.slice(1, 3), 16);
+                g = parseInt(color.slice(3, 5), 16);
+                b = parseInt(color.slice(5, 7), 16);
+            } 
+            // 处理rgba颜色
+            else if (color.startsWith('rgba')) {
+                const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (rgbaMatch) {
+                    r = parseInt(rgbaMatch[1]);
+                    g = parseInt(rgbaMatch[2]);
+                    b = parseInt(rgbaMatch[3]);
+                } else {
+                    r = g = b = 0;
+                }
+            } else {
+                r = g = b = 0;
+            }
+            
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            
+            // 根据亮度设置文字阴影
+            if (brightness > 128) {
+                // 亮色文字，使用深色阴影
+                element.style.textShadow = '1px 1px 3px rgba(0, 0, 0, 0.7)';
+            } else {
+                // 暗色文字，使用浅色阴影
+                element.style.textShadow = '1px 1px 3px rgba(255, 255, 255, 0.7)';
+            }
+        }
+        
+        // 获取随机颜色
+        function getRandomColor() {
+            const colors = [
+                '#FF4081', '#F50057', '#C51162', '#FF1744', '#D50000', '#E91E63',
+                '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4',
+                '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107',
+                '#FF9800', '#FF5722', '#795548', '#9E9E9E', '#607D8B'
+            ];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        // 将hex颜色转换为rgba颜色
+        function hexToRgba(hex, opacity) {
+            let r = 0, g = 0, b = 0;
+            
+            // 处理3位hex颜色
+            if (hex.length === 4) {
+                r = parseInt(hex[1] + hex[1], 16);
+                g = parseInt(hex[2] + hex[2], 16);
+                b = parseInt(hex[3] + hex[3], 16);
+            }
+            // 处理6位hex颜色
+            else if (hex.length === 7) {
+                r = parseInt(hex.slice(1, 3), 16);
+                g = parseInt(hex.slice(3, 5), 16);
+                b = parseInt(hex.slice(5, 7), 16);
+            }
+            
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+        
+        // ==================== 翻译器功能 ====================
+        
+        // 翻译文本
+        function translateText() {
+            const translatorInput = document.getElementById('translatorInput');
+            const text = translatorInput.value.trim();
+            
+            if (text === '') {
+                showNotification('请输入要翻译的中文文本！', 'warning');
+                return;
+            }
+            
+            // 显示翻译中...
+            document.getElementById('translationResult').innerHTML = '<span style="color: #999;">翻译中...</span>';
+            
+            // 模拟翻译过程
+            setTimeout(() => {
+                // 实际应用中应该调用翻译API
+                // 这里使用一个简单的模拟翻译
+                const translatedText = simulateTranslation(text);
+                document.getElementById('translationResult').innerHTML = translatedText;
+                
+                // 保存翻译历史
+                saveTranslationHistory(text, translatedText);
+                
+                showNotification('翻译完成！', 'success');
+            }, 800);
+        }
+        
+        // 模拟翻译（简单的字典映射）
+        function simulateTranslation(text) {
+            // 简单的翻译字典
+            const dictionary = {
+                // 问候语
+                '你好': 'こんにちは',
+                '早上好': 'おはようございます',
+                '晚上好': 'こんばんは',
+                '晚安': 'おやすみなさい',
+                '谢谢': 'ありがとうございます',
+                '对不起': 'ごめんなさい',
+                '再见': 'さようなら',
+                
+                // 常见词汇
+                '爱': '愛',
+                '梦想': '夢',
+                '希望': '希望',
+                '快乐': '幸せ',
+                '朋友': '友達',
+                '家人': '家族',
+                '今天': '今日',
+                '明天': '明日',
+                '昨天': '昨日',
+                '现在': '今',
+                '未来': '未来',
+                
+                // 网页相关内容
+                '网页': 'ウェブページ',
+                '礼物': 'プレゼント',
+                '祝福': '祝福',
+                '惊喜': 'サプライズ',
+                '音乐': '音楽',
+                '便签': 'メモ',
+                '日历': 'カレンダー',
+                '弹幕': 'コメント',
+                '翻译': '翻訳',
+                
+                // 其他
+                '可爱': 'かわいい',
+                '美丽': '美しい',
+                '强大': '強い',
+                '有趣': '面白い',
+                '特别': '特別',
+                '重要': '重要',
+                '开心': '嬉しい',
+                '感动': '感動',
+                '努力': '努力',
+                '成功': '成功'
+            };
+            
+            // 尝试逐词翻译
+            let result = text;
+            for (const [chinese, japanese] of Object.entries(dictionary)) {
+                const regex = new RegExp(chinese, 'g');
+                result = result.replace(regex, japanese);
+            }
+            
+            // 如果没有任何匹配，添加通用翻译
+            if (result === text) {
+                result = `「${text}」は、日本語では「${text}」です。`;
+            }
+            
+            return result;
+        }
+        
+        // 保存翻译历史
+        function saveTranslationHistory(original, translated) {
+            let history = JSON.parse(localStorage.getItem('translationHistory')) || [];
+            
+            const translationRecord = {
+                id: Date.now(),
+                original: original,
+                translated: translated,
+                date: new Date().toLocaleString('zh-CN')
+            };
+            
+            history.push(translationRecord);
+            
+            // 只保留最近的10条记录
+            if (history.length > 10) {
+                history = history.slice(-10);
+            }
+            
+            localStorage.setItem('translationHistory', JSON.stringify(history));
+        }
+        
+        // 清空翻译
+        function clearTranslation() {
+            document.getElementById('translatorInput').value = '';
+            document.getElementById('translationResult').innerHTML = '翻译结果将显示在这里...';
+        }
+        
+        // 添加示例文本
+        function addSampleText() {
+            const sampleTexts = [
+                "你好，今天天气真好！",
+                "我喜欢这个网页，它非常有趣。",
+                "祝你天天开心，梦想成真！",
+                "谢谢你的礼物，我很感动。",
+                "音乐播放器很可爱，我喜欢。"
+            ];
+            
+            const randomText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
+            document.getElementById('translatorInput').value = randomText;
+            showNotification('示例文本已添加', 'info');
+        }
+        
+        // ==================== 音乐播放器功能 ====================
+        
+        // 初始化音乐播放器
+        function initMusicPlayer() {
+            // 创建音频元素
+            audioPlayer = new Audio();
+            audioPlayer.src = musicLibrary[0].src;
+            audioPlayer.volume = 0.7;
+            
+            // 设置播放器初始状态
+            updatePlayerInfo();
+            createPlaylist();
+            
+            // 添加事件监听器
+            audioPlayer.addEventListener('timeupdate', updateProgress);
+            audioPlayer.addEventListener('loadedmetadata', function() {
+                document.getElementById('duration').textContent = formatTime(audioPlayer.duration);
+            });
+            audioPlayer.addEventListener('ended', nextSong);
+            
+            // 开始播放（可选）
+            // togglePlay();
+        }
+        
+        // 切换播放/暂停
+        function togglePlay() {
+            if (!audioPlayer) return;
+            
+            if (isPlaying) {
+                audioPlayer.pause();
+                document.getElementById('playBtn').innerHTML = '▶';
+                clearInterval(progressInterval);
+            } else {
+                audioPlayer.play();
+                document.getElementById('playBtn').innerHTML = '⏸';
+                
+                // 更新进度条
+                progressInterval = setInterval(updateProgress, 1000);
+            }
+            
+            isPlaying = !isPlaying;
+        }
+        
+        // 上一首
+        function previousSong() {
+            currentSongIndex--;
+            if (currentSongIndex < 0) {
+                currentSongIndex = musicLibrary.length - 1;
+            }
+            
+            loadSong(currentSongIndex);
+            if (isPlaying) {
+                audioPlayer.play();
+            }
+        }
+        
+        // 下一首
+        function nextSong() {
+            currentSongIndex++;
+            if (currentSongIndex >= musicLibrary.length) {
+                currentSongIndex = 0;
+            }
+            
+            loadSong(currentSongIndex);
+            if (isPlaying) {
+                audioPlayer.play();
+            }
+        }
+        
+        // 加载歌曲
+        function loadSong(index) {
+            if (!audioPlayer) return;
+            
+            currentSongIndex = index;
+            audioPlayer.src = musicLibrary[index].src;
+            
+            updatePlayerInfo();
+            updatePlaylistHighlight();
+            
+            // 如果正在播放，继续播放
+            if (isPlaying) {
+                audioPlayer.play();
+            }
+        }
+        
+        // 更新播放器信息
+        function updatePlayerInfo() {
+            const song = musicLibrary[currentSongIndex];
+            
+            document.getElementById('songTitle').textContent = song.title;
+            document.getElementById('songArtist').textContent = song.artist;
+            document.getElementById('albumArt').src = song.cover;
+            
+            // 更新播放按钮
+            document.getElementById('playBtn').innerHTML = isPlaying ? '⏸' : '▶';
+        }
+        
+        // 更新进度条
+        function updateProgress() {
+            if (!audioPlayer) return;
+            
+            const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            document.getElementById('progress').style.width = `${progressPercent}%`;
+            
+            document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
+        }
+        
+        // 改变音量
+        function changeVolume(value) {
+            if (!audioPlayer) return;
+            
+            audioPlayer.volume = value;
+        }
+        
+        // 创建播放列表
+        function createPlaylist() {
+            const playlistItems = document.getElementById('playlistItems');
+            playlistItems.innerHTML = '';
+            
+            musicLibrary.forEach((song, index) => {
+                const item = document.createElement('div');
+                item.className = 'playlist-item';
+                if (index === currentSongIndex) {
+                    item.classList.add('active');
+                }
+                
+                item.innerHTML = `
+                    <span>${song.title}</span>
+                    <span style="margin-left: auto; color: #666; font-size: 0.8em;">${song.artist}</span>
+                `;
+                
+                item.onclick = () => loadSong(index);
+                
+                playlistItems.appendChild(item);
+            });
+        }
+        
+        // 更新播放列表高亮
+        function updatePlaylistHighlight() {
+            const items = document.querySelectorAll('.playlist-item');
+            items.forEach((item, index) => {
+                if (index === currentSongIndex) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+        
+        // 切换最小化
+        function toggleMinimize() {
+            const player = document.getElementById('musicPlayer');
+            const playerBody = document.getElementById('playerBody');
+            const miniPlayer = document.getElementById('miniPlayer');
+            
+            isMinimized = !isMinimized;
+            
+            if (isMinimized) {
+                player.classList.add('minimized');
+                playerBody.style.display = 'none';
+                miniPlayer.style.display = 'block';
+                
+                // 随机选择跳动emoji
+                const emojis = ['🎵', '🎶', '🎼', '🎤', '🎧', '📻', '🎹', '🎸', '🎷', '🎺', '🥁', '🪕'];
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                miniPlayer.textContent = randomEmoji;
+            } else {
+                player.classList.remove('minimized');
+                playerBody.style.display = 'block';
+                miniPlayer.style.display = 'none';
+            }
+        }
+        
+        // 格式化时间
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+        
+        // ==================== 通用功能 ====================
+        
+        // 显示通知
+        function showNotification(message, type) {
+            // 移除之前的通知
+            const oldNotification = document.querySelector('.notification');
+            if (oldNotification) {
+                oldNotification.remove();
+            }
+            
+            // 创建新通知
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            
+            // 根据类型设置颜色
+            let bgColor, textColor;
+            switch(type) {
+                case 'success':
+                    bgColor = '#4CAF50';
+                    textColor = 'white';
+                    break;
+                case 'warning':
+                    bgColor = '#FF9800';
+                    textColor = 'white';
+                    break;
+                case 'info':
+                    bgColor = '#2196F3';
+                    textColor = 'white';
+                    break;
+                default:
+                    bgColor = '#333';
+                    textColor = 'white';
+            }
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${bgColor};
+                color: ${textColor};
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 10000;
+                animation: slideInRight 0.5s ease-out;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.5s ease-out';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+            
+            // 添加CSS动画
+            if (!document.querySelector('#notificationStyle')) {
+                const style = document.createElement('style');
+                style.id = 'notificationStyle';
+                style.textContent = `
+                    @keyframes slideInRight {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOutRight {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        // HTML转义，防止XSS攻击
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
+```
+
